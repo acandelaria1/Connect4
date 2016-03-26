@@ -20,6 +20,67 @@ public class GameGui extends JFrame {
 		}
 	}
 	
+		public void presentGameBoardGui(){
+			JFrame gameBoardFrame = new JFrame("Connect 4");
+			JPanel panel = new JPanel(new GridLayout(gameRef.getBoardSize(), gameRef.getBoardSize()));
+			panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+			gameBoardFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			gameBoardFrame.setContentPane(panel);
+			panel.setBackground(Color.BLUE);
+			
+			// The nested for loops will instantiate a custom button
+			// add an action listener to the button and add it to the grid 
+			for(int row = 0; row < gameRef.getBoardSize(); row++){
+				for(int col = 0; col < gameRef.getBoardSize(); col++){
+					Connect4SlotButton b = new Connect4SlotButton("");
+					b.setColumnNumber(col);
+					b.addActionListener(new ActionListener(){
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						int column = ((Connect4SlotButton) e.getSource()).getColumnNumber();
+						int row = gameRef.addTokenAtColumn(column);
+						//AddTokenAtColumn returns -1 if the column is full
+						if(row != -1){
+							//Set the color of the button the color of the turn
+							buttons[row][column].setForeground(gameRef.getTurn() == COLOR.YELLOW ? Color.YELLOW: Color.RED);
+							if(gameRef.checkWin(row,column, gameRef.getTurn())) {
+									presentMenu(gameRef.getTurn() + " WON!");
+									//Present Menu declaring winner and then offering a choice to replay or quit
+									
+									
+							}
+							//Check if the board is full ONLY if row = 0;
+							if(row == 0 && gameRef.checkIsBoardFull()){
+								// Present Menu showing tie and allowing reset
+								presentMenu("Tie Game!");
+							}
+							
+							//Switch Turn
+							//Switches color turn
+							if(gameRef.getTurn() == COLOR.RED) gameRef.setTurn(COLOR.YELLOW); 
+							else gameRef.setTurn(COLOR.RED);
+						}
+					}
+					
+				});
+				buttons[row][col] = b;
+				b.setForeground(Color.white);
+				gameBoardFrame.add(b);
+				
+				}
+			}
+			gameBoardFrame.pack();
+			gameBoardFrame.setLocation(dim.width/2-gameBoardFrame.getSize().width/2, dim.height/3-gameBoardFrame.getSize().height/2);
+			gameBoardFrame.setVisible(true);
+			
+			// Closes configuration menu
+			//theFrame.dispose();
+			
+		}
+		
+	//});
+		//}
 	
 	public void presentMenu(String s){
 		
@@ -60,30 +121,26 @@ public class GameGui extends JFrame {
 		wFrame.setVisible(true);
 	}
 	
-	public void promptErrorMessage(){
-//		//Must have board size no greater than 20 and connection length must be less than board size
-//		JFrame errorFrame = new JFrame("Board Size must not exceed 20 | connection length must not exceed board size");
-//		errorFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		JButton okButton = new JButton("OK");
-//		
-//		errorFrame.setLayout(new FlowLayout());
-//		//errorFrame.
-//		okButton.addActionListener(new ActionListener(){
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//				wFrame.setLayout(new FlowLayout());
-//				wFrame.add(resetButton);
-//				wFrame.add(quitButton);
-//				wFrame.pack();	
-//				
-//			}
-			
-//		});
+	public void promptErrorMessage(String errorMessage){
+		JFrame errorFrame = new JFrame(errorMessage);
+		errorFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JButton okButton = new JButton("OK");
 		
-		
-		
+		errorFrame.setLayout(new FlowLayout());
+		//errorFrame.
+		okButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				errorFrame.dispose();
+			}
+		});
+		errorFrame.setLayout(new FlowLayout());
+		errorFrame.add(okButton);
+		errorFrame.pack();	
+		errorFrame.setSize(500, 100);
+		errorFrame.setLocation(dim.width/3,dim.height/3);
+		errorFrame.setVisible(true);
 	}
 	
 	
@@ -107,70 +164,33 @@ public class GameGui extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Game game = new Game(Integer.parseInt(connectionLengthField.getText()),Integer.parseInt(boardSizeField.getText()));
+				
+				int connectionLength = Integer.parseInt(connectionLengthField.getText());
+				int boardSize = Integer.parseInt(boardSizeField.getText());
+				Game game = new Game(connectionLength, boardSize);
+				
 				// Create new game Board Gui...
 				gameRef = game;
-				int boardSize = game.getBoardSize();
 				buttons = new Connect4SlotButton[boardSize][boardSize];
-				JFrame gameBoardFrame = new JFrame("Connect 4");
-				JPanel panel = new JPanel(new GridLayout(boardSize, boardSize));
-				panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-				gameBoardFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				gameBoardFrame.setContentPane(panel);
-				panel.setBackground(Color.BLUE);
-				
-				// The nested for loops will instantiate a custom button
-				// add an action listener to the button and add it to the grid 
-				for(int row = 0; row < boardSize; row++){
-					for(int col = 0; col < boardSize; col++){
-						Connect4SlotButton b = new Connect4SlotButton("");
-						b.setColumnNumber(col);
-						b.addActionListener(new ActionListener(){
-
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							int column = ((Connect4SlotButton) e.getSource()).getColumnNumber();
-							int row = game.addTokenAtColumn(column);
-							//AddTokenAtColumn returns -1 if the column is full
-							if(row != -1){
-								//Set the color of the button the color of the turn
-								buttons[row][column].setForeground(game.getTurn() == COLOR.YELLOW ? Color.YELLOW: Color.RED);
-								if(game.checkWin(row,column, game.getTurn())) {
-										presentMenu(game.getTurn() + " WON!");
-										//Present Menu declaring winner and then offering a choice to replay or quit
-										
-										
-								}
-								//Check if the board is full ONLY if row = 0;
-								if(row == 0 && game.checkIsBoardFull()){
-									// Present Menu showing tie and allowing reset
-									presentMenu("Tie Game!");
-								}
-								
-								//Switch Turn
-								//Switches color turn
-								if(game.getTurn() == COLOR.RED) game.setTurn(COLOR.YELLOW); 
-								else game.setTurn(COLOR.RED);
-							}
-						}
-						
-					});
-					buttons[row][col] = b;
-					b.setForeground(Color.white);
-					gameBoardFrame.add(b);
-					
+					if(boardSize > 20){
+						promptErrorMessage("Board Size Must Not Exceed 20 Using Default of 8");
+						boardSizeField.setText("8");
+						//boardSize=8;
 					}
-				}
-				gameBoardFrame.pack();
-				gameBoardFrame.setLocation(dim.width/2-gameBoardFrame.getSize().width/2, dim.height/3-gameBoardFrame.getSize().height/2);
-				gameBoardFrame.setVisible(true);
-				
-				// Closes configuration menu
-				theFrame.dispose();
-				
+					else if(connectionLength > boardSize){
+						promptErrorMessage("Connection Length Must Not Exceed Board Size Using Default of 4");
+						connectionLengthField.setText("4");
+						//gameRef.setBoardSize(8);connectionLength = 4;
+					}else{
+						presentGameBoardGui();
+					}
+					
 			}
+					
+			});
+				
 			
-		});
+	
 		theFrame.add(okButton);
 		theFrame.pack();
 		theFrame.setLocation( dim.width/3-(int)this.getSize().getWidth(), dim.height/3- (int)this.getSize().getHeight());
