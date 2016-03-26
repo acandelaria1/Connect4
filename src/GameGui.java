@@ -164,23 +164,33 @@ public class GameGui extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				int connectionLength = Integer.parseInt(connectionLengthField.getText());
-				int boardSize = Integer.parseInt(boardSizeField.getText());
+				int connectionLength;
+				int boardSize;
+				try{
+				connectionLength = Integer.parseInt(connectionLengthField.getText());
+				boardSize = Integer.parseInt(boardSizeField.getText());
+				}catch(Exception ex){
+					promptErrorMessage("Using Default Settings");
+					connectionLengthField.setText("4");
+					boardSizeField.setText("8");
+					connectionLength = 4;
+					boardSize = 8;
+					//Will end execution early because settings were not correct
+					return;
+				}
 				Game game = new Game(connectionLength, boardSize);
 				
 				// Create new game Board Gui...
 				gameRef = game;
 				buttons = new Connect4SlotButton[boardSize][boardSize];
-					if(boardSize > 20){
-						promptErrorMessage("Board Size Must Not Exceed 20 Using Default of 8");
+					if(boardSize > 20 || boardSize < 4){
+						promptErrorMessage("Board Size Must Be between 4-20. Using Default of 8");
 						boardSizeField.setText("8");
 						//boardSize=8;
 					}
-					else if(connectionLength > boardSize){
+					else if(connectionLength > boardSize  ){
 						promptErrorMessage("Connection Length Must Not Exceed Board Size Using Default of 4");
-						connectionLengthField.setText("4");
-						//gameRef.setBoardSize(8);connectionLength = 4;
+						connectionLengthField.setText("4");					
 					}else{
 						presentGameBoardGui();
 					}
